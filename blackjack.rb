@@ -1,20 +1,20 @@
 puts "\nHi! I'm your Croupier Carlos Canizal, what is your name?"
 name = gets.chomp.capitalize
 
-$CARDS = {"A"=>11,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"J"=>10,"Q"=>10,"K"=>10}
-$DECKS = []
+card_equivalence = {"A"=>11,"2"=>2,"3"=>3,"4"=>4,"5"=>5,"6"=>6,"7"=>7,"8"=>8,"9"=>9,"10"=>10,"J"=>10,"Q"=>10,"K"=>10}
+decks = []
 
-def start_game
-	$DECKS = [["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4,
-			  ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4,
-			  ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4,
-			  ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4]
+def start_game 
+	decks = [["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4,
+			 ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4,
+			 ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4,
+			 ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]*4]
 end
 
-def get_total cards
+def get_total(cards,card_equivalence)
 	total = 0
 	cards.each do |card|
-		card_value = $CARDS[card]
+		card_value = card_equivalence[card]
 		if card == "A"
 			card_value = total + card_value > 21 ? 1 : card_value
 		end
@@ -23,17 +23,17 @@ def get_total cards
 	total
 end
 
-def hit_card current_player
-	deck = rand($DECKS.length)
-	card = rand($DECKS[deck].length)
-	current_player[:cards] << $DECKS[deck][card]
-	if $DECKS[deck][card] == "A"
-		current_player[:order] << $DECKS[deck][card]
+def hit_card(current_player,decks)
+	deck = rand(decks.length)
+	card = rand(decks[deck].length)
+	current_player[:cards] << decks[deck][card]
+	if decks[deck][card] == "A"
+	   current_player[:order] << decks[deck][card]
 	else
-		current_player[:order].unshift($DECKS[deck][card])
+		current_player[:order].unshift(decks[deck][card])
 	end
-	$DECKS[deck].delete_at(card)
-	current_player
+	decks[deck].delete_at(card)
+	{current_player:current_player,decks:decks}
 end
 
 commands = ["hit", "stay"]
@@ -44,14 +44,18 @@ while true
 	dealer  = {cards:[],order:[]}
 	player  = {cards:[],order:[]}
 	dealer_play = true
-	start_game
+	decks = start_game
 
 	2.times do
-		player = hit_card player
+		hit = hit_card(player,decks)
+		player = hit[:current_player]
+		decks = hit[:decks]
 	end
 
 	2.times do
-		dealer = hit_card dealer
+		hit = hit_card(dealer,decks)
+		dealer = hit[:current_player]
+		decks = hit[:decks]
 	end
 
 	puts "\nTwo first cards." 
@@ -59,7 +63,7 @@ while true
 	puts "Croupier: *, #{dealer[:cards][1]}"
 
 
-	player_total = get_total player[:order]
+	player_total = get_total(player[:order], card_equivalence)
 
 	if player_total < 21
 		puts "\nDo you want 'hit' or 'stay'"
@@ -69,11 +73,13 @@ while true
 			command = gets.chomp.downcase
 		end
 		while command == "hit"
-			player = hit_card player
+			hit = hit_card(player,decks)
+			player = hit[:current_player]
+			decks = hit[:decks]
 			puts "\nCroupier gives you on more card."
 			puts "#{name}: "+player[:cards].join(' , ')
 			puts "Croupier: #{dealer[:cards][1]} , *"
-			player_total = get_total player[:order]
+			player_total = get_total(player[:order], card_equivalence)
 			if player_total > 21
 				puts "\nYou are over 21, You Loose"
 				dealer_play = false
@@ -93,10 +99,12 @@ while true
 	end
 
 	if dealer_play
-		dealer_total = get_total dealer[:order]
+		dealer_total = get_total(dealer[:order], card_equivalence)
 		while dealer_total < 16
-			dealer = hit_card dealer
-			dealer_total = get_total dealer[:order]
+			hit = hit_card(dealer,decks)
+			dealer = hit[:current_player]
+			decks = hit[:decks]
+			dealer_total = get_total(dealer[:order], card_equivalence)
 		end
 
 		puts "\n#{name}: "+player[:cards].join(' , ')
@@ -108,7 +116,7 @@ while true
 
 		if dealer_total == player_total
 			puts "\nThis is a draw! Nobody wins!!!"
-		elsif player_total == 21 && dealer[:cards].length ==2
+		elsif player_total == 21 && player[:cards].length ==2
 			puts "\nBlackJack! You win! Congratulations #{name}!"
 		elsif player_total > dealer_total || dealer_total > 21
 			puts "\nYou win! Congratulations #{name}!"
@@ -131,10 +139,5 @@ while true
 		exit
 	end
 end
-
-
-
-
-
 
 
