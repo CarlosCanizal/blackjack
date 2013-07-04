@@ -100,7 +100,7 @@ while true
 
 	if dealer_play
 		dealer_total = get_total(dealer[:order], card_equivalence)
-		while dealer_total < 16
+		while dealer_total <= 16
 			hit = hit_card(dealer,decks)
 			dealer = hit[:current_player]
 			decks = hit[:decks]
