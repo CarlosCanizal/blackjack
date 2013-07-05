@@ -1,7 +1,6 @@
 require 'pry'
 
 decks = []
-suits = %w(Spades Diamonds Hearts Clubs)
 
 def start_game 
 	suits = %w(Spades Diamonds Hearts Clubs)

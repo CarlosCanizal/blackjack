@@ -4,8 +4,6 @@ puts "\nHi! I'm your Croupier Carlos Canizal, what is your name?"
 name = gets.chomp.capitalize
 
 decks = []
-suits = %w(Spades Diamonds Hearts Clubs)
-
 
 def start_game 
 	suits = %w(Spades Diamonds Hearts Clubs)
